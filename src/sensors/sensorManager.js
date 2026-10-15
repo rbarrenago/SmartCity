@@ -25,7 +25,8 @@ const csvSafe = (v) => {
 };
 
 export class SensorManager {
-  constructor({ scene, graph, sim, getSimTime }) {
+  constructor({ scene, graph, sim, getSimTime, runContext = { scenarioId: 'baseline', runId: 'baseline-seed-42', seed: 42, dataOrigin: 'simulated' } }) {
+    this.runContext = runContext;
     this.graph = graph;
     this.sim = sim;
     this.getSimTime = getSimTime;
@@ -169,6 +170,10 @@ export class SensorManager {
       const count = s.bucket.fwd + s.bucket.bwd;
       const record = {
         timestamp,
+        scenario_id: this.runContext.scenarioId,
+        run_id: this.runContext.runId,
+        seed: this.runContext.seed,
+        data_origin: this.runContext.dataOrigin,
         weekday: WEEKDAYS[d.getUTCDay()],
         sensor_id: s.id,
         sensor_name: s.name,
@@ -219,7 +224,7 @@ export class SensorManager {
   }
 
   recordsCsv() {
-    const cols = ['timestamp', 'weekday', 'sensor_id', 'sensor_name', 'x', 'z', 'count', 'count_fwd', 'count_bwd', 'avg_speed_kmh'];
+    const cols = ['timestamp', 'weekday', 'sensor_id', 'sensor_name', 'x', 'z', 'count', 'count_fwd', 'count_bwd', 'avg_speed_kmh', 'scenario_id', 'run_id', 'seed', 'data_origin'];
     const lines = [cols.join(',')];
     for (const r of this.records) lines.push(cols.map((c) => csvSafe(r[c] ?? '')).join(','));
     return lines.join('\n');
