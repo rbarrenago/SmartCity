@@ -37,7 +37,7 @@ function pickFile(accept) {
   });
 }
 
-export function createHud({ clock, params, sim, signals, sensors, setMode, getMode }) {
+export function createHud({ clock, params, sim, signals, sensors, setMode, getMode, runContext }) {
   const root = el('div', { id: 'hud' });
   document.body.append(root);
 
@@ -151,6 +151,7 @@ export function createHud({ clock, params, sim, signals, sensors, setMode, getMo
 
   root.append(
     el('h2', {}, 'SmartCity Donostia'),
+    el('p', { class: 'help' }, `Escenario: ${runContext.scenarioId} · Ejecución: ${runContext.runId} · Semilla: ${runContext.seed} · Datos simulados`),
     clockSection, trafficSection, signalSection, sensorSection,
     el('p', { class: 'help' }, 'Ratón: arrastrar = girar, derecho = mover, rueda = zoom. Esc: salir del modo sensor. Supr: borrar sensor seleccionado.'),
   );
