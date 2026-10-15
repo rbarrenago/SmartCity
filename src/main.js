@@ -12,10 +12,14 @@ import { TrafficSim } from './traffic/sim.js';
 import { demandFactor } from './traffic/demand.js';
 import { SensorManager } from './sensors/sensorManager.js';
 import { createHud } from './ui/hud.js';
+import { createSeededRandom } from './simulation/random.js';
+import { createRunContext } from './simulation/runConfig.js';
 
 const loading = document.getElementById('loading');
 
 async function main() {
+  const runContext = createRunContext(window.location.search);
+  const random = createSeededRandom(runContext.seed);
   const data = await loadCity();
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -63,9 +67,9 @@ async function main() {
   const params = { maxCars: CONFIG.cars.initialMax };
 
   let sensors;
-  const sim = new TrafficSim(graph, signals, (sensor, dir, speed) => sensors.recordCrossing(sensor, dir, speed));
+  const sim = new TrafficSim(graph, signals, (sensor, dir, speed) => sensors.recordCrossing(sensor, dir, speed), random);
   scene.add(sim.mesh);
-  sensors = new SensorManager({ scene, graph, sim, getSimTime: () => clock.simTime });
+  sensors = new SensorManager({ scene, graph, sim, getSimTime: () => clock.simTime, runContext });
   sensors.load();
 
   // Modo de interacción: navegar o colocar sensores
@@ -75,7 +79,7 @@ async function main() {
     if (m !== 'sensor') sensors.showGhost(0, 0, false);
     renderer.domElement.style.cursor = m === 'sensor' ? 'crosshair' : '';
   };
-  const hud = createHud({ clock, params, sim, signals, sensors, setMode, getMode: () => mode });
+  const hud = createHud({ clock, params, sim, signals, sensors, setMode, getMode: () => mode, runContext });
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
